@@ -15,6 +15,8 @@ To then graph this information:
 
     python3 main.py -graph all
 
+![Graph](/graph.png)
+
 To log a basic message:
 
     python3 main.py -log "weather test"
