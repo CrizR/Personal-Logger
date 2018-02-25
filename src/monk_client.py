@@ -25,17 +25,17 @@ class MonkClient(object):
         """
         data = {}
         arg_types = [{
-            "type": "Cognitive",
+            "type": "cognitive",
             "rating": argv.c,
             "description": argv.cd
         },
             {
-                "type": "Emotional",
+                "type": "emotional",
                 "rating": argv.e,
                 "description": argv.ed
             }
             , {
-                "type": "Physical",
+                "type": "physical",
                 "rating": argv.p,
                 "description": argv.pd
             }
@@ -44,7 +44,7 @@ class MonkClient(object):
 
         for data_type in arg_types:
             if data_type["rating"]:
-                if 10 > int(data_type["rating"]) > 0:
+                if 10 >= int(data_type["rating"]) > 0:
                     data[data_type["type"]] = {
                         "rating": data_type["rating"],
                         "description": data_type["description"],
@@ -64,7 +64,7 @@ class MonkClient(object):
         Graphs personal progress data
         :return:
         """
-        logging.info("Printing Data")
+        logging.info("Graphing Data")
         pprog = self.db["PersonalProgress"]
         cursor = pprog.find({})
         data = {
@@ -73,14 +73,13 @@ class MonkClient(object):
             "cognitive": []
         }
         for doc in cursor:
-            i = 0
             date = list(doc.keys())[1]
-            for key in list(doc[date].keys()):
-                rating = int(doc[date][key]["rating"])
-                data[key].append([i, rating])
-            i += 1
+            for key in list(doc[date]['data'].keys()):
+                rating = int(doc[date]["data"][key]["rating"])
+                data[key].append(rating)
         for key in data.keys():
-            data[key].reverse()
+            plt.ylabel('Level')
+            plt.xlabel('Number of Logs - Ordered By Date')
             plt.plot(data[key])
         plt.legend(['Emotional', 'Physical', 'Cognitive'], loc='upper left')
         plt.show()
