@@ -14,8 +14,8 @@ To post information relevant to my current state I can do the following:
 To then graph this information:
 
     python3 main.py -graph all
-    
-![Graph](/graph.png) 
+
+![Graph](/graph.png)
 
 To log a basic message:
 
