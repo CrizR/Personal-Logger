@@ -19,14 +19,17 @@ class Weather(object):
             country_code = g.country
         url = "http://api.openweathermap.org/data/2.5/weather?q="
         key = "a5e0c2f9d95a59f6cebcc153be85af60"
-        response = json.loads(requests.post(url + city_name + "," + country_code.upper() + "&"
-                                            + "APPID=" + key).text)
+        try:
+            response = json.loads(requests.post(url + city_name + "," + country_code.upper() + "&"
+                                                + "APPID=" + key).text)
+        except ConnectionError or ConnectionAbortedError or ConnectionResetError or TimeoutError:
+            return {}
         wtype = []
         for type in response['weather']:
             wtype.append(type['main'])
         wanted_data = {
             "weather_type": wtype,
-            'temperature': response['main']["temp"],
+            'temperature': round(response['main']["temp"] * 9/5 - 459.67, 2),
             'pressure': response['main']['pressure'],
             'humidity': response['main']['humidity'],
             'visibility': response['visibility'],

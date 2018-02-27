@@ -15,7 +15,7 @@ To then graph this information:
 
     python3 main.py -graph all
     
-![alt text](/graph.png) 
+![Graph](/graph.png) 
 
 To log a basic message:
 
