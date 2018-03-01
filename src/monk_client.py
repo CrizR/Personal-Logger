@@ -44,7 +44,7 @@ class MonkClient(object):
 
         for data_type in arg_types:
             if data_type["rating"]:
-                if 10 >= int(data_type["rating"]) > 0:
+                if 100 >= int(data_type["rating"]) > 0:
                     data[data_type["type"]] = {
                         "rating": data_type["rating"],
                         "description": data_type["description"],
@@ -53,7 +53,7 @@ class MonkClient(object):
                 else:
                     logging.error("Invalid Rating, must be 1-10")
                     exit(1)
-        today = datetime.datetime.now().strftime("%Y-%m-%d %H")
+        today = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
         insert_data = {today: {"data": data, "weather": Weather.get_weather()}}
         logging.info("Updating Progress")
         pprog = self.db["PersonalProgress"]
@@ -115,7 +115,7 @@ class MonkClient(object):
         """
         logging.info("Logging Message")
         ml = self.db["MonkLogs"]
-        today = datetime.datetime.now().strftime("%Y-%m-%d %H")
+        today = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
         ml.insert({today: {"log": msg,
                            "sentiment": self.get_sentiment(msg),
                            "weather": Weather.get_weather()}})
