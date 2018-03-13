@@ -37,7 +37,7 @@ class MonkController(object):
             elif argv.lprint == "file":
                 mc.print_logs(True)
             elif argv.lprint == "confile":
-                mc.print_data(False)
+                mc.print_logs(False)
                 mc.print_logs(True)
             else:
                 logging.error("Must provide valid print arg [console, file, or confile]")
@@ -47,16 +47,24 @@ class MonkController(object):
             if argv.dprint == "console":
                 mc.print_data(False)
             elif argv.dprint == "file":
-                mc.print_logs(True)
+                mc.print_data(True)
             elif argv.dprint == "confile":
                 mc.print_data(False)
-                mc.print_logs(True)
+                mc.print_data(True)
             else:
                 logging.error("Must provide valid print arg [console, file, or confile]")
                 exit(1)
 
         if argv.fdel:
             mc.drop_database("MonkMode")
+
+        if argv.ilogs:
+            file = argv.ilogs
+            mc.import_data(file, "log")
+
+        if argv.idata:
+            file = argv.idata
+            mc.import_data(file, "data")
 
     @staticmethod
     def parse_args():
@@ -73,4 +81,6 @@ class MonkController(object):
         parser.add_argument("-lprint", help="Print Logs")
         parser.add_argument("-dprint", help="Print Progress Data")
         parser.add_argument("-fdel", help="No Data Saved Anywhere")
+        parser.add_argument("-ilogs", help="Import Logs")
+        parser.add_argument("-idata", help="Import Data")
         return parser.parse_args()

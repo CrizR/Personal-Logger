@@ -47,4 +47,10 @@ To just delete everything:
      python3 main.py -fdel
 
 
+To import data:
+
+    python3 main.py -ilogs file # For Logs
+    
+    python3 main.py -idata file  # For Data
+
 On my computer I've created an alias that simplifies many of these commands, you can too by altering your ~/.bash_profile

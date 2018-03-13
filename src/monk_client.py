@@ -94,8 +94,8 @@ class MonkClient(object):
         pprog = self.db["PersonalProgress"]
         cursor = pprog.find({})
         if to_file:
-            ff = open(os.getcwd() + "/old_data.txt", "w+")
-            logging.info("Writing to file: " + os.getcwd() + "/old_data.txt")
+            ff = open(os.getcwd() + "/progress_data.txt", "w+")
+            logging.info("Writing to file: " + os.getcwd() + "/progress_data.txt")
             for doc in cursor:
                 date = list(doc.keys())[1]
                 info = {date: json.dumps(doc[date])}
@@ -106,6 +106,29 @@ class MonkClient(object):
                 date = list(doc.keys())[1]
                 info = {date: json.dumps(doc[date])}
                 print(info)
+
+    def print_logs(self, to_file=True):
+        """
+        Prints out the logs to console or file
+        :param to_file:
+        :return:
+        """
+        logging.info("Printing Log Data")
+        ml = self.db["MonkLogs"]
+        cursor = ml.find({})
+        if to_file:
+            ff = open("log_data.txt", "w+")
+            logging.info("Writing to file: " + os.getcwd() + "/log_data.txt")
+            for msg in cursor:
+                date = list(msg.keys())[1]
+                msg = {date: json.dumps(msg[date])}
+                ff.writelines(str(msg) + "\n")
+            ff.close()
+        else:
+            for msg in cursor:
+                date = list(msg.keys())[1]
+                msg = {date: json.dumps(msg[date])}
+                print(msg)
 
     def log(self, msg):
         """
@@ -120,28 +143,30 @@ class MonkClient(object):
                            "sentiment": self.get_sentiment(msg),
                            "weather": Weather.get_weather()}})
 
-    def print_logs(self, to_file=True):
+    def import_data(self, file, import_type: str):
         """
-        Prints out the logs to console or file
-        :param to_file:
+        Imports data from the given file
+        :param file:
+        :param import_type:
         :return:
         """
-        logging.info("Printing Log Data")
-        ml = self.db["MonkLogs"]
-        cursor = ml.find({})
-        if to_file:
-            ff = open("monk_logs.txt", "w+")
-            logging.info("Writing to file: " + os.getcwd() + "/monk_logs.txt")
-            for msg in cursor:
-                date = list(msg.keys())[1]
-                msg = {date: json.dumps(msg[date])}
-                ff.writelines(str(msg) + "\n")
-            ff.close()
+        if import_type == "log":
+            collection = self.db["PersonalProgress"]
+        elif import_type == "data":
+            collection = self.db["MonkLogs"]
         else:
-            for msg in cursor:
-                date = list(msg.keys())[1]
-                msg = {date: json.dumps(msg[date])}
-                print(msg)
+            collection = ""
+            logging.error("Invalid Type")
+            exit(1)
+        try:
+            fl = open(file)
+            data = fl.readlines()
+            for line in data:
+                logging.info("Inserting", line)
+                collection.insert_one(json.loads(line))
+        except FileNotFoundError:
+            logging.error("File Not Found")
+            exit(1)
 
     def drop_database(self, name):
         """
