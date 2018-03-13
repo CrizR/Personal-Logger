@@ -98,14 +98,14 @@ class MonkClient(object):
             logging.info("Writing to file: " + os.getcwd() + "/progress_data.txt")
             for doc in cursor:
                 date = list(doc.keys())[1]
-                info = {date: json.dumps(doc[date])}
-                ff.writelines(str(info) + "\n")
+                info = {date: doc[date]}
+                ff.writelines(json.dumps(info) + "\n")
             ff.close()
         else:
             for doc in cursor:
                 date = list(doc.keys())[1]
-                info = {date: json.dumps(doc[date])}
-                print(info)
+                info = {date: doc[date]}
+                print(json.dumps(info))
 
     def print_logs(self, to_file=True):
         """
@@ -119,16 +119,16 @@ class MonkClient(object):
         if to_file:
             ff = open("log_data.txt", "w+")
             logging.info("Writing to file: " + os.getcwd() + "/log_data.txt")
-            for msg in cursor:
-                date = list(msg.keys())[1]
-                msg = {date: json.dumps(msg[date])}
-                ff.writelines(str(msg) + "\n")
+            for log in cursor:
+                date = list(log.keys())[1]
+                log = {date: log[date]}
+                ff.writelines(json.dumps(log) + "\n")
             ff.close()
         else:
-            for msg in cursor:
-                date = list(msg.keys())[1]
-                msg = {date: json.dumps(msg[date])}
-                print(msg)
+            for log in cursor:
+                date = list(log.keys())[1]
+                log = {date: log[date]}
+                print(json.dumps(log))
 
     def log(self, msg):
         """
