@@ -150,9 +150,9 @@ class MonkClient(object):
         :param import_type:
         :return:
         """
-        if import_type == "log":
+        if import_type == "data":
             collection = self.db["PersonalProgress"]
-        elif import_type == "data":
+        elif import_type == "log":
             collection = self.db["MonkLogs"]
         else:
             collection = ""
@@ -162,7 +162,6 @@ class MonkClient(object):
             fl = open(file)
             data = fl.readlines()
             for line in data:
-                logging.info("Inserting", line)
                 collection.insert_one(json.loads(line))
         except FileNotFoundError:
             logging.error("File Not Found")
