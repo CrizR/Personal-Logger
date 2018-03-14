@@ -9,6 +9,7 @@ import pymongo
 from textblob import TextBlob
 
 from src.components.weather_client import Weather
+import random
 
 
 class MonkClient(object):
@@ -73,7 +74,7 @@ class MonkClient(object):
             "physical": [],
             "cognitive": []
         }
-        comp = self.get_time_frame(timeframe)
+        comp = self.get_timeframe(timeframe)
         for doc in cursor:
             date = list(doc.keys())[1]
             try:
@@ -192,7 +193,6 @@ class MonkClient(object):
         logging.info("Dropping Collection")
         self.db.drop_collection(name)
 
-
     @staticmethod
     def get_sentiment(desc):
         """
@@ -211,7 +211,8 @@ class MonkClient(object):
         else:
             return 'negative'
 
-    def get_time_frame(self, timeframe):
+    @staticmethod
+    def get_timeframe(timeframe):
         now = datetime.date.today()
         if timeframe == "all":
             logging.info(" __________")
@@ -240,9 +241,7 @@ class MonkClient(object):
             comp = now - datetime.timedelta(days=365 * 10)
         return comp
 
-    def stats(self, timeframe=None):
-        collection = self.db["MonkLogs"]
-        cursor = collection.find({})
+    def stats(self, timeframe=None, print=True):
         sentiments = {
             "positive": 0,
             "negative": 0,
@@ -254,10 +253,125 @@ class MonkClient(object):
             "negative": [],
             "neutral": [],
         }
-        comp = self.get_time_frame(timeframe)
+        top_weathers = {
+            "positive": '',
+            "negative": '',
+            "neutral": ''
+        }
+        weathers = Counter()
+        most_common_weather_types = {
+            "positive": Counter({}),
+            "negative": Counter({}),
+            "neutral": Counter({})
+        }
+        trio = {
+            "cognitive": 0,
+            "physical": 0,
+            "emotional": 0
+        }
+        comp = self.get_timeframe(timeframe)
         number_of_logs = 0
         number_of_progress = 0
 
+        number_of_logs = self.log_stats(comp, number_of_logs, sentiments, weather, weather_mood)
+        number_of_progress = self.progress_stats(comp, number_of_progress, sentiments, trio, weather, weather_mood)
+
+        for mood in weather_mood.keys():
+            most_common_weather_types[mood] = Counter(weather_mood[mood])
+            weathers += Counter(weather_mood[mood])
+        highest_percent = 0
+        for mood in top_weathers.keys():
+            for weather_type in most_common_weather_types[mood].keys():
+                if most_common_weather_types[mood][weather_type] / weathers[weather_type] > highest_percent:
+                    if weathers[weather_type] > 1:
+                        highest_percent = most_common_weather_types[mood][weather_type] / weathers[weather_type]
+                        top_weathers[mood] = weather_type
+            highest_percent = 0
+
+        emotion_percent = {
+            "positive": round(sentiments["positive"] / (sentiments["positive"] +
+                                                        sentiments["negative"] + sentiments["neutral"]) * 100, 2),
+            "neutral": round(sentiments["neutral"] / (sentiments["positive"] +
+                                                      sentiments["negative"] + sentiments["neutral"]) * 100, 2),
+            "negative": round(sentiments["negative"] / (sentiments["positive"] +
+                                                        sentiments["negative"] + sentiments["neutral"]) * 100, 2)
+        }
+        if print:
+            logging.info("Number of Logs:\t\t\t\t|" + str(number_of_logs))
+            logging.info("Number of Progress Logs:\t\t|" + str(number_of_progress))
+            for mood in emotion_percent.keys():
+                logging.info("Percent " + mood.capitalize() + " \t\t\t|" + str(emotion_percent[mood]) + "%")
+            logging.info("Most Common Weather:\t\t\t|" + str(weathers.most_common(1)[0][0]))
+            for mood in top_weathers.keys():
+                logging.info("Most " + mood.capitalize() + " Weather:\t\t\t|" + top_weathers[mood])
+            logging.info("Average Cognitive Rating:\t\t|" + str(round((trio["cognitive"] / number_of_progress), 2)))
+            logging.info("Average Physical Rating:\t\t|" + str(round((trio["physical"] / number_of_progress), 2)))
+            logging.info("Average Emotional Rating:\t\t|" + str(round((trio["emotional"] / number_of_progress), 2)))
+
+        return {
+            "logs": number_of_logs,
+            "personal_logs": number_of_progress,
+            "positive_percent": emotion_percent["positive"],
+            "negative_percent": emotion_percent["negative"],
+            "neutral_percent": emotion_percent["neutral"],
+            "positive_weather": top_weathers["positive"],
+            "negative_weather": top_weathers["negative"],
+            "neutral_weather": top_weathers["neutral"],
+            "avg_cognitive": str(round((trio["cognitive"] / number_of_progress), 2)),
+            "avg_physical": str(round((trio["physical"] / number_of_progress), 2)),
+            "avg_emotion": str(round((trio["emotional"] / number_of_progress), 2))
+        }
+
+    def progress_stats(self, comp, number_of_progress, sentiments, trio, weather, weather_mood):
+        """
+        Get progress stats
+        :param comp:
+        :param number_of_progress:
+        :param sentiments:
+        :param trio:
+        :param weather:
+        :param weather_mood:
+        :return:
+        """
+        collection = self.db["PersonalProgress"]
+        cursor = collection.find({})
+        for data in cursor:
+            date = list(data.keys())[1]
+            try:
+                datecomp = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M")
+            except:
+                datecomp = datetime.datetime.today()
+            if datecomp > datetime.datetime.combine(comp, datetime.time.min):
+                number_of_progress += 1
+                pdata = data[date]["data"]
+                for type in pdata.keys():
+                    trio[type] += int(pdata[type]["rating"])
+                    sentiment = pdata[type]["sentiment"]
+                    sentiments[sentiment] += 1
+                    log = data[date]
+                    if "weather" in log \
+                            and log["weather"] is not None \
+                            and "weather_type" in log["weather"]:
+                        weather_types = log["weather"]["weather_type"]
+                        for weather_type in weather_types:
+                            if weather_type not in weather:
+                                weather[weather_type] = 0
+                            weather[weather_type] += 1
+                            weather_mood[sentiment].append(weather_type)
+        return number_of_progress
+
+    def log_stats(self, comp, number_of_logs, sentiments, weather, weather_mood):
+        """
+        Get log stats
+        :param comp:
+        :param number_of_logs:
+        :param sentiments:
+        :param weather:
+        :param weather_mood:
+        :return:
+        """
+        collection = self.db["MonkLogs"]
+        cursor = collection.find({})
         for log in cursor:
             date = list(log.keys())[1]
             try:
@@ -277,79 +391,7 @@ class MonkClient(object):
                             weather[weather_type] = 0
                         weather[weather_type] += 1
                         weather_mood[sentiment].append(weather_type)
+        return number_of_logs
 
-        collection = self.db["PersonalProgress"]
-        cursor = collection.find({})
-        trio = {
-            "cognitive": 0,
-            "physical": 0,
-            "emotional": 0
-        }
 
-        num = 0
-        for data in cursor:
-            date = list(data.keys())[1]
-            try:
-                datecomp = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M")
-            except:
-                datecomp = datetime.datetime.today()
-            if datecomp > datetime.datetime.combine(comp, datetime.time.min):
-                number_of_progress += 1
-                num += 1
-                pdata = data[date]["data"]
-                for type in pdata.keys():
-                    trio[type] += int(pdata[type]["rating"])
-                    sentiment = pdata[type]["sentiment"]
-                    sentiments[sentiment] += 1
-                    log = data[date]
-                    if "weather" in log \
-                            and log["weather"] is not None \
-                            and "weather_type" in log["weather"]:
-                        weather_types = log["weather"]["weather_type"]
-                        for weather_type in weather_types:
-                            if weather_type not in weather:
-                                weather[weather_type] = 0
-                            weather[weather_type] += 1
-                            weather_mood[sentiment].append(weather_type)
 
-        logging.info("Number of Logs:\t\t\t\t|" + str(number_of_logs))
-        logging.info("Number of Progress Logs:\t\t|" + str(number_of_progress))
-        emotion_percent = {
-            "positive": round(sentiments["positive"] / (sentiments["positive"] +
-                             sentiments["negative"] + sentiments["neutral"]) * 100, 2),
-            "neutral": round(sentiments["neutral"] / (sentiments["positive"] +
-                             sentiments["negative"] + sentiments["neutral"]) * 100, 2),
-            "negative": round(sentiments["negative"] / (sentiments["positive"] +
-                                sentiments["negative"] + sentiments["neutral"]) * 100, 2)
-        }
-        for mood in emotion_percent.keys():
-            logging.info("Percent " + mood.capitalize() + " \t\t\t|" + str(emotion_percent[mood]) + "%")
-
-        weathers = Counter()
-        most_common_weather_types = {
-            "positive": Counter({}),
-            "negative": Counter({}),
-            "neutral": Counter({})
-        }
-        for mood in weather_mood.keys():
-            most_common_weather_types[mood] = Counter(weather_mood[mood])
-            weathers += Counter(weather_mood[mood])
-        logging.info("Most Common Weather:\t\t\t|" + str(weathers.most_common(1)[0][0]))
-        top_weathers = {
-            "positive": '',
-            "negative": '',
-            "neutral": ''
-        }
-        highest_percent = 0
-        for mood in weather_mood.keys():
-            for weather_type in most_common_weather_types[mood].keys():
-                if most_common_weather_types[mood][weather_type] / weathers[weather_type] > highest_percent:
-                    if weathers[weather_type] > 1:
-                        highest_percent = most_common_weather_types[mood][weather_type] / weathers[weather_type]
-                        top_weathers[mood] = weather_type
-            highest_percent = 0
-            logging.info("Most " + mood.capitalize() + " Weather:\t\t\t|" + top_weathers[mood])
-
-        logging.info("Average Cognitive Rating:\t\t|" + str(round((trio["cognitive"] / num), 2)))
-        logging.info("Average Physical Rating:\t\t|" + str(round((trio["physical"] / num), 2)))
-        logging.info("Average Emotional Rating:\t\t|" + str(round((trio["emotional"] / num), 2)))
