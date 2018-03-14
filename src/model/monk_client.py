@@ -144,7 +144,7 @@ class MonkClient(object):
                            "sentiment": self.get_sentiment(msg),
                            "weather": Weather.get_weather()}})
 
-    def import_data(self, file, import_type: str):
+    def import_data(self, file, import_type):
         """
         Imports data from the given file
         :param file:
