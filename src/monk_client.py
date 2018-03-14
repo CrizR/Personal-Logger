@@ -325,7 +325,6 @@ class MonkClient(object):
         for mood in weather_mood.keys():
             most_common_weather_types[mood] = Counter(weather_mood[mood])
             weathers += Counter(weather_mood[mood])
-            most_common = Counter(weather_mood[mood]).most_common(1)[0][0]
         logging.info("Most Common Weather:\t\t\t|" + str(weathers.most_common(1)[0][0]))
         top_weathers = {
             "positive": '',
