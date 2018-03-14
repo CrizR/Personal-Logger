@@ -66,6 +66,9 @@ class MonkController(object):
             file = argv.idata
             mc.import_data(file, "data")
 
+        if argv.stats:
+            mc.stats(argv.stats)
+
     @staticmethod
     def parse_args():
         parser = argparse.ArgumentParser()
@@ -83,4 +86,5 @@ class MonkController(object):
         parser.add_argument("-fdel", help="No Data Saved Anywhere")
         parser.add_argument("-ilogs", help="Import Logs")
         parser.add_argument("-idata", help="Import Data")
+        parser.add_argument("-stats", help="Positivity Stats")
         return parser.parse_args()

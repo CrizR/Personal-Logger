@@ -44,7 +44,7 @@ To reset all data (Will also dump to file):
 
 To just delete everything:
 
-     python3 main.py -fdel
+    python3 main.py -fdel
 
 
 To import data:
@@ -52,5 +52,27 @@ To import data:
     python3 main.py -ilogs file # For Logs
     
     python3 main.py -idata file  # For Data
+    
+    
+To see stats (all, year, month, week):
+
+    python3 main.py -stats all
+  
+    Number of Logs:				|23
+    Number of Progress Logs:		|6
+    Percent Positive 			|78.05%
+    Percent Neutral 			|14.63%
+    Percent Negative 			|7.32%
+    Most Common Weather:			|Clouds
+    Most Positive Weather:			|Snow
+    Most Negative Weather:			|Rain
+    Most Neutral Weather:			|Rain
+    Average Cognitive Rating:		|64.17
+    Average Physical Rating:		|65.83
+    Average Emotional Rating:		|65.83
+
+  
+
+
 
 On my computer I've created an alias that simplifies many of these commands, you can too by altering your ~/.bash_profile
