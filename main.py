@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from src.controller import MonkController
+from src.controller.controller import MonkController
 
 HOST = 'localhost'
 PORT = 27017

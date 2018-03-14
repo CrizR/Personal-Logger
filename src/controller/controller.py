@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from src.monk_client import MonkClient
+from src.model.monk_client import MonkClient
 
 
 class MonkController(object):

@@ -2,13 +2,13 @@ import datetime
 import json
 import logging
 import os
+from collections import Counter
 
 import matplotlib.pyplot as plt
 import pymongo
 from textblob import TextBlob
 
-from src.weather_client import Weather
-from collections import Counter
+from src.components.weather_client import Weather
 
 
 class MonkClient(object):
