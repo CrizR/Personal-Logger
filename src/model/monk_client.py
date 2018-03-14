@@ -60,7 +60,7 @@ class MonkClient(object):
         pprog = self.db["PersonalProgress"]
         pprog.insert(insert_data)
 
-    def graph_data(self):
+    def graph_data(self, timeframe):
         """
         Graphs personal progress data
         :return:
@@ -73,11 +73,17 @@ class MonkClient(object):
             "physical": [],
             "cognitive": []
         }
+        comp = self.get_time_frame(timeframe)
         for doc in cursor:
             date = list(doc.keys())[1]
-            for key in list(doc[date]['data'].keys()):
-                rating = int(doc[date]["data"][key]["rating"])
-                data[key].append(rating)
+            try:
+                datecomp = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M")
+            except:
+                datecomp = datetime.datetime.today()
+            if datecomp > datetime.datetime.combine(comp, datetime.time.min):
+                for key in list(doc[date]['data'].keys()):
+                    rating = int(doc[date]["data"][key]["rating"])
+                    data[key].append(rating)
         for key in data.keys():
             plt.ylabel('Level')
             plt.xlabel('Number of Logs - Ordered By Date')
@@ -205,20 +211,7 @@ class MonkClient(object):
         else:
             return 'negative'
 
-    def stats(self, timeframe=None):
-        collection = self.db["MonkLogs"]
-        cursor = collection.find({})
-        sentiments = {
-            "positive": 0,
-            "negative": 0,
-            "neutral": 0,
-        }
-        weather = {}
-        weather_mood = {
-            "positive": [],
-            "negative": [],
-            "neutral": [],
-        }
+    def get_time_frame(self, timeframe):
         now = datetime.date.today()
         if timeframe == "all":
             logging.info(" __________")
@@ -245,7 +238,23 @@ class MonkClient(object):
             logging.info("| All data |")
             logging.info("|__________|\n")
             comp = now - datetime.timedelta(days=365 * 10)
+        return comp
 
+    def stats(self, timeframe=None):
+        collection = self.db["MonkLogs"]
+        cursor = collection.find({})
+        sentiments = {
+            "positive": 0,
+            "negative": 0,
+            "neutral": 0,
+        }
+        weather = {}
+        weather_mood = {
+            "positive": [],
+            "negative": [],
+            "neutral": [],
+        }
+        comp = self.get_time_frame(timeframe)
         number_of_logs = 0
         number_of_progress = 0
 
@@ -288,7 +297,7 @@ class MonkClient(object):
                 number_of_progress += 1
                 num += 1
                 pdata = data[date]["data"]
-                for type in trio.keys():
+                for type in pdata.keys():
                     trio[type] += int(pdata[type]["rating"])
                     sentiment = pdata[type]["sentiment"]
                     sentiments[sentiment] += 1
@@ -335,12 +344,12 @@ class MonkClient(object):
         for mood in weather_mood.keys():
             for weather_type in most_common_weather_types[mood].keys():
                 if most_common_weather_types[mood][weather_type] / weathers[weather_type] > highest_percent:
-                    highest_percent = most_common_weather_types[mood][weather_type] / weathers[weather_type]
-                    top_weathers[mood] = weather_type
+                    if weathers[weather_type] > 1:
+                        highest_percent = most_common_weather_types[mood][weather_type] / weathers[weather_type]
+                        top_weathers[mood] = weather_type
             highest_percent = 0
             logging.info("Most " + mood.capitalize() + " Weather:\t\t\t|" + top_weathers[mood])
 
         logging.info("Average Cognitive Rating:\t\t|" + str(round((trio["cognitive"] / num), 2)))
         logging.info("Average Physical Rating:\t\t|" + str(round((trio["physical"] / num), 2)))
-        logging.info("Average Emotional Rating:\t\t|" + str(round((trio["physical"] / num), 2)))
-        self.graph_data()
+        logging.info("Average Emotional Rating:\t\t|" + str(round((trio["emotional"] / num), 2)))

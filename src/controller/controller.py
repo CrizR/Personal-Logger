@@ -13,7 +13,7 @@ class MonkController(object):
             mc.update_progress(argv)
 
         if argv.graph:
-            mc.graph_data()
+            mc.graph_data(argv.graph)
 
         if argv.reset:
             if argv.reset == "logs":
