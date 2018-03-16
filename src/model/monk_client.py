@@ -82,12 +82,12 @@ class MonkClient(object):
             except:
                 datecomp = datetime.datetime.today()
             if datecomp > datetime.datetime.combine(comp, datetime.time.min):
-                for key in list(doc[date]['data'].keys()):
+                for key in data.keys():
                     rating = int(doc[date]["data"][key]["rating"])
                     data[key].append(rating)
+        plt.ylabel('Level')
+        plt.xlabel('Number of Logs - Ordered By Date')
         for key in data.keys():
-            plt.ylabel('Level')
-            plt.xlabel('Number of Logs - Ordered By Date')
             plt.plot(data[key])
         plt.legend(['Emotional', 'Physical', 'Cognitive'], loc='upper left')
         plt.show()
@@ -392,6 +392,3 @@ class MonkClient(object):
                         weather[weather_type] += 1
                         weather_mood[sentiment].append(weather_type)
         return number_of_logs
-
-
-

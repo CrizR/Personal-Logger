@@ -1,6 +1,7 @@
 import logging
 import sys
 
+
 from src.controller.controller import MonkController
 
 HOST = 'localhost'

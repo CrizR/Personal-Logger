@@ -69,6 +69,9 @@ class MonkController(object):
         if argv.stats:
             mc.stats(argv.stats)
 
+        if argv.ping:
+            logging.info("Pong!")
+
     @staticmethod
     def parse_args():
         parser = argparse.ArgumentParser()
@@ -83,8 +86,9 @@ class MonkController(object):
         parser.add_argument("-log", help="Logs a message")
         parser.add_argument("-lprint", help="Print Logs")
         parser.add_argument("-dprint", help="Print Progress Data")
-        parser.add_argument("-fdel", help="No Data Saved Anywhere")
+        parser.add_argument("-fdel", action='store_true', help="No Data Saved Anywhere")
         parser.add_argument("-ilogs", help="Import Logs")
         parser.add_argument("-idata", help="Import Data")
-        parser.add_argument("-stats", help="Positivity Stats")
+        parser.add_argument("-stats", help="Stats")
+        parser.add_argument("-ping", action='store_true', help="Test to see if it's working")
         return parser.parse_args()
