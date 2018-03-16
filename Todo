@@ -1,3 +1,6 @@
 Add temperature analysis
 Fix weather analysis
-Add timerange to graph
+Add days of the week
+Add food to progress log
+Add a sort function for the graph
+Make the graph display dates and hours correctly
