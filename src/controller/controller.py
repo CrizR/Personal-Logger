@@ -12,6 +12,15 @@ class MonkController(object):
         if argv.c or argv.e or argv.ed:
             mc.update_progress(argv)
 
+        if argv.dinner:
+            mc.log_meal("dinner", argv.dinner.split(","))
+
+        if argv.lunch:
+            mc.log_meal("lunch", argv.lunch.split(","))
+
+        if argv.breakfast:
+            mc.log_meal("breakfast", argv.breakfast.split(","))
+
         if argv.graph:
             mc.graph_data(argv.graph)
 
@@ -55,6 +64,18 @@ class MonkController(object):
                 logging.error("Must provide valid print arg [console, file, or confile]")
                 exit(1)
 
+        if argv.fprint:
+            if argv.fprint == "console":
+                mc.print_foods(False)
+            elif argv.fprint == "file":
+                mc.print_foods(True)
+            elif argv.fprint == "confile":
+                mc.print_foods(False)
+                mc.print_foods(True)
+            else:
+                logging.error("Must provide valid print arg [console, file, or confile]")
+                exit(1)
+
         if argv.fdel:
             mc.drop_database("MonkMode")
 
@@ -81,11 +102,15 @@ class MonkController(object):
         parser.add_argument("-ed", help="Emotional Description")
         parser.add_argument("-p", help="Physical Rating")
         parser.add_argument("-pd", help="Physical Description")
+        parser.add_argument("-dinner", help="Log Dinner")
+        parser.add_argument("-lunch", help="Log Lunch")
+        parser.add_argument("-breakfast", help="Log Breakfast")
         parser.add_argument("-reset", help="Resets specified data and puts old data in .txt file")
         parser.add_argument("-graph", help="Graph Data")
         parser.add_argument("-log", help="Logs a message")
         parser.add_argument("-lprint", help="Print Logs")
         parser.add_argument("-dprint", help="Print Progress Data")
+        parser.add_argument("-fprint", help="Print food data")
         parser.add_argument("-fdel", action='store_true', help="No Data Saved Anywhere")
         parser.add_argument("-ilogs", help="Import Logs")
         parser.add_argument("-idata", help="Import Data")

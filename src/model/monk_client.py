@@ -138,6 +138,29 @@ class MonkClient(object):
                 log = {date: log[date]}
                 print(json.dumps(log))
 
+    def print_foods(self, to_file=True):
+        """
+               Prints out the food logs to console or file
+               :param to_file:
+               :return:
+               """
+        logging.info("Printing Food Data")
+        ml = self.db["FoodLogs"]
+        cursor = ml.find({})
+        if to_file:
+            ff = open("food_data.txt", "w+")
+            logging.info("Writing to file: " + os.getcwd() + "/food_data.txt")
+            for log in cursor:
+                date = list(log.keys())[1]
+                log = {date: log[date]}
+                ff.writelines(json.dumps(log) + "\n")
+            ff.close()
+        else:
+            for log in cursor:
+                date = list(log.keys())[1]
+                log = {date: log[date]}
+                print(json.dumps(log))
+
     def log(self, msg):
         """
         Log msg to db
@@ -150,6 +173,32 @@ class MonkClient(object):
         ml.insert({today: {"log": msg,
                            "sentiment": self.get_sentiment(msg),
                            "weather": Weather.get_weather()}})
+
+    def log_meal(self, mealtime, foods_input:[]):
+        logging.info("Logging Meal")
+        fl = self.db["FoodLogs"]
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
+        today_time = datetime.datetime.now()
+        start = today + " 00:00"
+        cursor = fl.find({})
+        if cursor is not None:
+            for data in cursor:
+                id = data["_id"]
+                date = list(data.keys())[1]
+                if datetime.datetime.strptime(date, "%Y-%m-%d %H:%M") \
+                        > datetime.datetime.strptime(start, "%Y-%m-%d %H:%M") \
+                        < today_time:
+                    if data[date]["meal"] == mealtime:
+                        foods = data[date]["foods"]
+                        for food in foods_input:
+                            if food not in foods:
+                                logging.info("Adding " + food + " to existing entry.")
+                                foods.append(food)
+                        result = fl.update_one({"_id": id}, {"$set": {date + ".foods": foods}})
+                        logging.debug("Matched Count" + str(result.matched_count))
+                        logging.debug("Modified Count" + str(result.modified_count))
+        else:
+            fl.insert({today_time: {"meal": mealtime, "foods": foods_input}})
 
     def import_data(self, file, import_type):
         """
@@ -321,6 +370,31 @@ class MonkClient(object):
             "avg_physical": str(round((trio["physical"] / number_of_progress), 2)),
             "avg_emotion": str(round((trio["emotional"] / number_of_progress), 2))
         }
+
+    # def food_stats(self):
+    #     collection = self.db["FoodLogs"]
+    #     cursor = collection.find({})
+    #     collection2 = self.db["PersonalProgress"]
+    #     best_foods = {
+    #         # food_type: how it affected traits
+    #     }
+    #     for data in cursor:
+    #         date = list(data.keys())[1]
+    #         meal = data[date]["meal"]
+    #         foods = data[date]["foods"]
+    #         for food in foods:
+    #             trait_avgs = {
+    #                 "cognitive":0,
+    #                 "physical":0,
+    #                 "emotional":0
+    #             }
+    #             for log in day:
+    #
+    #
+    #             if food not in best_foods:
+    #                 best_foods[food] = 0
+    #             best_foods[food] += 1
+
 
     def progress_stats(self, comp, number_of_progress, sentiments, trio, weather, weather_mood):
         """
