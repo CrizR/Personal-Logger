@@ -102,26 +102,37 @@ class MonkController(object):
 
     @staticmethod
     def parse_args():
-        parser = argparse.ArgumentParser()
-        parser.add_argument("-c", help="Cognitive Rating")
-        parser.add_argument("-cd", help="Cognitive Description")
-        parser.add_argument("-e", help="Emotional Rating")
-        parser.add_argument("-ed", help="Emotional Description")
-        parser.add_argument("-p", help="Physical Rating")
-        parser.add_argument("-pd", help="Physical Description")
-        parser.add_argument("-dinner", help="Log Dinner")
-        parser.add_argument("-lunch", help="Log Lunch")
-        parser.add_argument("-breakfast", help="Log Breakfast")
-        parser.add_argument("-reset", help="Resets specified data and puts old data in .txt file")
-        parser.add_argument("-graph", help="Graph Data")
-        parser.add_argument("-log", help="Logs a message")
-        parser.add_argument("-lprint", help="Print Logs")
-        parser.add_argument("-dprint", help="Print Progress Data")
-        parser.add_argument("-fprint", help="Print food data")
-        parser.add_argument("-fdel", action='store_true', help="No Data Saved Anywhere")
-        parser.add_argument("-ilogs", help="Import Logs")
-        parser.add_argument("-idata", help="Import Data")
-        parser.add_argument("-ifood", help="Import Food Logs")
-        parser.add_argument("-stats", help="Stats")
-        parser.add_argument("-ping", action='store_true', help="Test to see if it's working")
+        parser = argparse.ArgumentParser(
+            description="******************************************************************************"
+                        "Welcome to Monk, a personal logging tool used to"
+                        " track your progress in a variety of different ways.")
+        parser.add_argument("-c", help="Use to log your current cognitive rating")
+        parser.add_argument("-cd", help="Use to describe why you think you deserve the "
+                                        "rating you've assigned or elaborate")
+        parser.add_argument("-e", help="Use to log your current emotional rating")
+        parser.add_argument("-ed", help="Use to describe why you think you deserve the "
+                                        "rating you've assigned or elaborate")
+        parser.add_argument("-p", help="Use to log your current physical rating")
+        parser.add_argument("-pd", help="Use to describe why you think you deserve the "
+                                        "rating you've assigned or elaborate")
+        parser.add_argument("-dinner", help="Use to log your dinner, it will automatically add calories if you've"
+                                            "inputted the given foods before")
+        parser.add_argument("-lunch", help="Use to log your lunch, it will automatically add calories if you've"
+                                           "inputted the given foods before")
+        parser.add_argument("-breakfast", help="Use to log your breakfast, it will automatically add calories if you've"
+                                               "inputted the given foods before")
+        parser.add_argument("-reset", help="Resets specified data and puts old data in .txt file [food, logs, data]")
+        parser.add_argument("-graph", help="Use to graph your personal data")
+        parser.add_argument("-log", help="Use to log a basic message")
+        parser.add_argument("-lprint", help="Use to print out your basic messages")
+        parser.add_argument("-dprint", help="Use to print out your personal progress logs")
+        parser.add_argument("-fprint", help="Use to print out your food logs")
+        parser.add_argument("-fdel", action='store_true', help="Use to delete all of the data, "
+                                                               "does not save anything to file")
+        parser.add_argument("-ilogs", help="Use to import personal logs, argument should be a filepath")
+        parser.add_argument("-idata", help="Use to import progress logs, argument should be a filepath")
+        parser.add_argument("-ifood", help="Use to import food logs, argument should be a filepath")
+        parser.add_argument("-stats", help="Use to display stats, "
+                                           "argument should be a timeframe [all, year, month, week]")
+        parser.add_argument("-ping", action='store_true', help="Use as a test to see if everything is working")
         return parser.parse_args()
