@@ -9,6 +9,7 @@ import pymongo
 from textblob import TextBlob
 
 from src.components.weather_client import Weather
+from src.components.calorie_client import CalorieClient
 import random
 
 
@@ -17,6 +18,7 @@ class MonkClient(object):
         self.host = host
         self.port = port
         self.client = pymongo.MongoClient(host, port)
+        self.calorie_client = CalorieClient(host, port)
         self.db = self.client["MonkMode"]
 
     def update_progress(self, argv):
@@ -181,24 +183,30 @@ class MonkClient(object):
         today_time = datetime.datetime.now()
         start = today + " 00:00"
         cursor = fl.find({})
-        if cursor is not None:
+        if cursor.count() > 0:
             for data in cursor:
-                id = data["_id"]
-                date = list(data.keys())[1]
-                if datetime.datetime.strptime(date, "%Y-%m-%d %H:%M") \
-                        > datetime.datetime.strptime(start, "%Y-%m-%d %H:%M") \
-                        < today_time:
-                    if data[date]["meal"] == mealtime:
-                        foods = data[date]["foods"]
-                        for food in foods_input:
-                            if food not in foods:
-                                logging.info("Adding " + food + " to existing entry.")
-                                foods.append(food)
-                        result = fl.update_one({"_id": id}, {"$set": {date + ".foods": foods}})
-                        logging.debug("Matched Count" + str(result.matched_count))
-                        logging.debug("Modified Count" + str(result.modified_count))
+                if data is not None:
+                    id = data["_id"]
+                    date = list(data.keys())[1]
+                    if datetime.datetime.strptime(date, "%Y-%m-%d %H:%M") \
+                            > datetime.datetime.strptime(start, "%Y-%m-%d %H:%M") \
+                            < today_time:
+                        if data[date]["meal"] == mealtime:
+                            foods = data[date]["foods"]
+                            for food in foods_input:
+                                if food not in foods:
+                                    logging.info("Adding " + food + " to existing entry.")
+                                    foods.append(food)
+                            calories = self.calorie_client.aggregate_calories(foods)
+                            result = fl.update_one({"_id": id}, {"$set": {date + ".foods": foods}})
+                            logging.debug("Matched Count" + str(result.matched_count))
+                            logging.debug("Modified Count" + str(result.modified_count))
+                            result = fl.update_one({"_id": id}, {"$set": {date + ".calories": calories}})
+                            logging.debug("Matched Count" + str(result.matched_count))
+                            logging.debug("Modified Count" + str(result.modified_count))
         else:
-            fl.insert({today_time: {"meal": mealtime, "foods": foods_input}})
+            calories = self.calorie_client.aggregate_calories(foods_input)
+            fl.insert({today_time.strftime("%Y-%m-%d %H:%M"): {"meal": mealtime, "foods": foods_input, "calories": calories}})
 
     def import_data(self, file, import_type):
         """
