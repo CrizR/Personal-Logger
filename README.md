@@ -1,6 +1,6 @@
 # PersonalLogger
 
-For fun, I created a personal command line tool that allows me to log data to a local mongodb database about how I'm currently feeling cognitively, emotionally, and physically (in addition to a regular message). When logging this information, I get the current weather data at the time that the log took place (using my comp's IP to determine what city I'm in). I also use a basic sentiment analysis plugin to log whether or not the messages I input are positive. Using all of this data, I can tell what specific indicators impact my health and make adjustments accordingly.
+For fun, I created a personal command line tool that allows me to log data to a local mongodb database about my current cognitive, physical, and emotional state, my diet, and regular messages. When logging this information, I get the current weather data at the time that the log took place (using my comp's IP to determine what city I'm in). I also use a basic sentiment analysis plugin to log whether or not the messages I input are positive. Using all of this data, I can tell what specific indicators impact my health, by doing some analytics on the data, and make adjustments accordingly.
 
 ## How I use it
 
