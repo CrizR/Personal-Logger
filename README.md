@@ -31,7 +31,7 @@ To log your food:
      
     python3 main.py -breakfast pasta,pizza,ice_cream
 
-To print both the logs and the personal data:
+To print information:
 
     python3 main.py -lprint console # For Logs
     
