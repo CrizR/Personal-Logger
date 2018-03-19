@@ -106,25 +106,28 @@ class MonkController(object):
             description="******************************************************************************"
                         "Welcome to Monk, a personal logging tool used to"
                         " track your progress in a variety of different ways.")
-        parser.add_argument("-c", type=int, help="Use to log your current cognitive rating")
-        parser.add_argument("-cd", help="Use to describe why you think you deserve the "
-                                        "rating you've assigned or elaborate")
-        parser.add_argument("-e", type=int, help="Use to log your current emotional rating")
-        parser.add_argument("-ed", help="Use to describe why you think you deserve the "
-                                        "rating you've assigned or elaborate")
-        parser.add_argument("-p", type=int, help="Use to log your current physical rating")
-        parser.add_argument("-pd", help="Use to describe why you think you deserve the "
-                                        "rating you've assigned or elaborate")
-        parser.add_argument("-dinner", help="Use to log your dinner, it will automatically add calories if you've"
-                                            "inputted the given foods before")
-        parser.add_argument("-lunch", help="Use to log your lunch, it will automatically add calories if you've"
-                                           "inputted the given foods before")
-        parser.add_argument("-breakfast", help="Use to log your breakfast, it will automatically add calories if you've"
-                                               "inputted the given foods before")
+        parser.add_argument("-c", dest='cognitive-rating', type=int, help="Use to log your current cognitive rating")
+        parser.add_argument("-cd", dest='cognitive-description', help="Use to describe why you think you deserve the "
+                                                                      "rating you've assigned or elaborate")
+        parser.add_argument("-e", dest='emotional-rating', type=int, help="Use to log your current emotional rating")
+        parser.add_argument("-ed", dest='emotional-description', help="Use to describe why you think you deserve the "
+                                                                      "rating you've assigned or elaborate")
+        parser.add_argument("-p", dest='physical-rating', type=int, help="Use to log your current physical rating")
+        parser.add_argument("-pd", dest='physical-description', help="Use to describe why you think you deserve the "
+                                                                     "rating you've assigned or elaborate")
+        parser.add_argument("-dinner", dest='foods',
+                            help="Use to log your dinner, it will automatically add calories if you've"
+                                 "inputted the given foods before. Foods should be comma delimited, no spaces.")
+        parser.add_argument("-lunch", dest='foods',
+                            help="Use to log your lunch, it will automatically add calories if you've"
+                                 "inputted the given foods before. Foods should be comma delimited, no spaces.")
+        parser.add_argument("-breakfast", dest='foods',
+                            help="Use to log your breakfast, it will automatically add calories if you've"
+                                 "inputted the given foods before. Foods should be comma delimited, no spaces.")
         parser.add_argument("-reset", choices=['food', 'log', 'data'],
                             help="Resets specified data and puts old data in .txt file")
         parser.add_argument("-graph", choices=['all', 'year', 'month', 'week'], help="Use to graph your personal data")
-        parser.add_argument("-log", choices=['message'], help="Use to log a basic message")
+        parser.add_argument("-log", dest="Message", help="Use to log a basic message")
         parser.add_argument("-lprint", choices=['console', 'file', 'confile'],
                             help="Use to print out your basic messages")
         parser.add_argument("-dprint", choices=['console', 'file', 'confile'],
@@ -132,9 +135,11 @@ class MonkController(object):
         parser.add_argument("-fprint", choices=['console', 'file', 'confile'], help="Use to print out your food logs")
         parser.add_argument("-fdel", action='store_true', help="Use to delete all of the data, "
                                                                "does not save anything to file")
-        parser.add_argument("-ilogs", help="Use to import personal logs, argument should be a filepath")
-        parser.add_argument("-idata", help="Use to import progress logs, argument should be a filepath")
-        parser.add_argument("-ifood", help="Use to import food logs, argument should be a filepath")
+        parser.add_argument("-ilogs", dest='filepath',
+                            help="Use to import personal logs, argument should be a filepath")
+        parser.add_argument("-idata", dest='filepath',
+                            help="Use to import progress logs, argument should be a filepath")
+        parser.add_argument("-ifood", dest='filepath', help="Use to import food logs, argument should be a filepath")
         parser.add_argument("-stats", choices=['all', 'year', 'month', 'week'], help="Use to display stats, "
                                                                                      "argument should be a timeframe")
         parser.add_argument("-ping", action='store_true', help="Use as a test to see if everything is working")
