@@ -1,6 +1,7 @@
 Add temperature analysis
 Fix weather analysis
 Analyze days of the week
-Add food, sleep, and workouts to progress log
+Add workout collection
+Add analytics for food data
 Add a sort function for the graph
 Make the graph display dates and hours correctly
