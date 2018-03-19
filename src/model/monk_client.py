@@ -10,7 +10,6 @@ from textblob import TextBlob
 
 from src.components.weather_client import Weather
 from src.components.calorie_client import CalorieClient
-import random
 
 
 class MonkClient(object):
@@ -183,6 +182,7 @@ class MonkClient(object):
         today_time = datetime.datetime.now()
         start = today + " 00:00"
         cursor = fl.find({})
+        found = False
         if cursor.count() > 0:
             for data in cursor:
                 if data is not None:
@@ -192,6 +192,7 @@ class MonkClient(object):
                             > datetime.datetime.strptime(start, "%Y-%m-%d %H:%M") \
                             < today_time:
                         if data[date]["meal"] == mealtime:
+                            found = True
                             foods = data[date]["foods"]
                             for food in foods_input:
                                 if food not in foods:
@@ -204,7 +205,7 @@ class MonkClient(object):
                             result = fl.update_one({"_id": id}, {"$set": {date + ".calories": calories}})
                             logging.debug("Matched Count" + str(result.matched_count))
                             logging.debug("Modified Count" + str(result.modified_count))
-        else:
+        if not found:
             calories = self.calorie_client.aggregate_calories(foods_input)
             fl.insert({today_time.strftime("%Y-%m-%d %H:%M"): {"meal": mealtime, "foods": foods_input, "calories": calories}})
 
