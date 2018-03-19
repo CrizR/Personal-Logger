@@ -1,6 +1,7 @@
 import logging
 import sys
-
+import subprocess
+import os
 
 from src.controller.controller import MonkController
 
@@ -14,7 +15,11 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         MonkController().run(HOST, PORT)
     else:
-        logging.error("Invalid Number of Arguments")
+        print("\n\n____________Welcome to Monk____________")
+        print("| A simple, personalized, logging tool |")
+        print("|                                      |")
+        print("|       use --help to learn more       |")
+        print("|______________________________________|\n\n")
 
 
 
