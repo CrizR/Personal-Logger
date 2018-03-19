@@ -23,11 +23,21 @@ To log a basic message:
     
     Input: {'2018-02-25 09': '{"log": "weather test", "sentiment": "neutral", "weather": {"weather_type": ["Rain", "Mist"], "temperature": 276.07, "pressure": 1025, "humidity": 80, "visibility": 14484, "wind_speed": 7.61}}'}
 
+To log your food:
+
+    python3 main.py -dinner pasta,pizza,ice_cream
+    
+    python3 main.py -lunch pasta,pizza,ice_cream
+     
+    python3 main.py -breakfast pasta,pizza,ice_cream
+
 To print both the logs and the personal data:
 
     python3 main.py -lprint console # For Logs
     
     python3 main.py -dprint console # For Data
+    
+    python3 main.py -fprint console # For Food
     
 Optionally this can be dumped to a file as well:
 
@@ -35,12 +45,15 @@ Optionally this can be dumped to a file as well:
     
     python3 main.py -dprint file # For Data
     
+    python3 main.py -fprint file # For Food
     
 To reset all data (Will also dump to file):
 
     python3 main.py -reset logs # For Logs
     
     python3 main.py -reset data  # For Data
+    
+    python3 main.py -reset food  # For food
 
 To just delete everything:
 
@@ -52,6 +65,8 @@ To import data:
     python3 main.py -ilogs file # For Logs
     
     python3 main.py -idata file  # For Data
+    
+    python3 main.py -ifood file  # For Food Logs
     
     
 To see stats (all, year, month, week):

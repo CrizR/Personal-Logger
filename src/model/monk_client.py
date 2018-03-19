@@ -211,6 +211,8 @@ class MonkClient(object):
             collection = self.db["PersonalProgress"]
         elif import_type == "log":
             collection = self.db["MonkLogs"]
+        elif import_type == "food":
+            collection = self.db["FoodLogs"]
         else:
             collection = ""
             logging.error("Invalid Type")

@@ -31,10 +31,13 @@ class MonkController(object):
             elif argv.reset == "data":
                 mc.print_data()
                 mc.drop_collection("PersonalProgress")
+            elif argv.reset == "food":
+                mc.print_foods()
+                mc.drop_collection("FoodLogs")
             elif argv.reset == "all":
                 mc.drop_database("MonkMode")
             else:
-                logging.error("Must provide valid reset arg [logs, data, or all]")
+                logging.error("Must provide valid reset arg [logs, data, food, all]")
                 exit(1)
 
         if argv.log:
@@ -87,6 +90,10 @@ class MonkController(object):
             file = argv.idata
             mc.import_data(file, "data")
 
+        if argv.ifood:
+            file = argv.ifood
+            mc.import_data(file, "food")
+
         if argv.stats:
             mc.stats(argv.stats)
 
@@ -114,6 +121,7 @@ class MonkController(object):
         parser.add_argument("-fdel", action='store_true', help="No Data Saved Anywhere")
         parser.add_argument("-ilogs", help="Import Logs")
         parser.add_argument("-idata", help="Import Data")
+        parser.add_argument("-ifood", help="Import Food Logs")
         parser.add_argument("-stats", help="Stats")
         parser.add_argument("-ping", action='store_true', help="Test to see if it's working")
         return parser.parse_args()
