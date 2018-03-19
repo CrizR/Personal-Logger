@@ -106,13 +106,13 @@ class MonkController(object):
             description="******************************************************************************"
                         "Welcome to Monk, a personal logging tool used to"
                         " track your progress in a variety of different ways.")
-        parser.add_argument("-c", help="Use to log your current cognitive rating")
+        parser.add_argument("-c", type=int, help="Use to log your current cognitive rating")
         parser.add_argument("-cd", help="Use to describe why you think you deserve the "
                                         "rating you've assigned or elaborate")
-        parser.add_argument("-e", help="Use to log your current emotional rating")
+        parser.add_argument("-e", type=int, help="Use to log your current emotional rating")
         parser.add_argument("-ed", help="Use to describe why you think you deserve the "
                                         "rating you've assigned or elaborate")
-        parser.add_argument("-p", help="Use to log your current physical rating")
+        parser.add_argument("-p", type=int, help="Use to log your current physical rating")
         parser.add_argument("-pd", help="Use to describe why you think you deserve the "
                                         "rating you've assigned or elaborate")
         parser.add_argument("-dinner", help="Use to log your dinner, it will automatically add calories if you've"
@@ -121,18 +121,21 @@ class MonkController(object):
                                            "inputted the given foods before")
         parser.add_argument("-breakfast", help="Use to log your breakfast, it will automatically add calories if you've"
                                                "inputted the given foods before")
-        parser.add_argument("-reset", help="Resets specified data and puts old data in .txt file [food, logs, data]")
-        parser.add_argument("-graph", help="Use to graph your personal data")
-        parser.add_argument("-log", help="Use to log a basic message")
-        parser.add_argument("-lprint", help="Use to print out your basic messages")
-        parser.add_argument("-dprint", help="Use to print out your personal progress logs")
-        parser.add_argument("-fprint", help="Use to print out your food logs")
+        parser.add_argument("-reset", choices=['food', 'log', 'data'],
+                            help="Resets specified data and puts old data in .txt file")
+        parser.add_argument("-graph", choices=['all', 'year', 'month', 'week'], help="Use to graph your personal data")
+        parser.add_argument("-log", choices=['message'], help="Use to log a basic message")
+        parser.add_argument("-lprint", choices=['console', 'file', 'confile'],
+                            help="Use to print out your basic messages")
+        parser.add_argument("-dprint", choices=['console', 'file', 'confile'],
+                            help="Use to print out your personal progress logs")
+        parser.add_argument("-fprint", choices=['console', 'file', 'confile'], help="Use to print out your food logs")
         parser.add_argument("-fdel", action='store_true', help="Use to delete all of the data, "
                                                                "does not save anything to file")
         parser.add_argument("-ilogs", help="Use to import personal logs, argument should be a filepath")
         parser.add_argument("-idata", help="Use to import progress logs, argument should be a filepath")
         parser.add_argument("-ifood", help="Use to import food logs, argument should be a filepath")
-        parser.add_argument("-stats", help="Use to display stats, "
-                                           "argument should be a timeframe [all, year, month, week]")
+        parser.add_argument("-stats", choices=['all', 'year', 'month', 'week'], help="Use to display stats, "
+                                                                                     "argument should be a timeframe")
         parser.add_argument("-ping", action='store_true', help="Use as a test to see if everything is working")
         return parser.parse_args()
