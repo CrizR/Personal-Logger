@@ -30,6 +30,10 @@ To log your food:
     python3 main.py -lunch pasta,pizza,ice_cream
      
     python3 main.py -breakfast pasta,pizza,ice_cream
+    
+Adding to a specific date
+   
+    python3 main.py -breakfast pasta,pizza,ice_cream -date 2018-3-10
 
 To print information:
 
@@ -73,21 +77,33 @@ To see stats (all, year, month, week):
 
     python3 main.py -stats all
   
-    Number of Logs:				|23
-    Number of Progress Logs:		|6
-    Percent Positive 			|78.05%
-    Percent Neutral 			|14.63%
-    Percent Negative 			|7.32%
-    Most Common Weather:			|Clouds
-    Most Positive Weather:			|Snow
-    Most Negative Weather:			|Rain
-    Most Neutral Weather:			|Rain
-    Average Cognitive Rating:		|64.17
-    Average Physical Rating:		|65.83
-    Average Emotional Rating:		|65.83
-
-  
-
-
+    ------------------------------------------------
+    General Stats:                                  
+    ------------------------------------------------
+    Number of Logs:                         |100    |
+    Number of Progress Logs:                |100    |
+    Number of Food Logs:                    |100    |
+    ------------------------------------------------
+    Weather Stats:                                  
+    ------------------------------------------------
+    Percent Positive                        |70.85 %|
+    Percent Neutral                         |18.64 %|
+    Percent Negative                        |10.51 %|
+    Most Common Weather:                    |Clear  |
+    Most Positive Weather:                  |Clear  |
+    Most Negative Weather:                  |Mist   |
+    Most Neutral Weather:                   |Clouds |
+    ------------------------------------------------
+    Progress Stats:                                 
+    ------------------------------------------------
+    Average Cognitive Rating:               |100.0  |
+    Average Physical Rating:                |100.0  |
+    Average Emotional Rating:               |100.0  |
+    ------------------------------------------------
+    Food Stats:                                     
+    ------------------------------------------------
+    Average Calories Per Day                |2500   |
+    Pounds Per Week                         |1      |
+    ------------------------------------------------
 
 On my computer I've created an alias that simplifies many of these commands, you can too by altering your ~/.bash_profile
