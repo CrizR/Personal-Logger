@@ -279,24 +279,14 @@ class MonkClient(object):
     def get_timeframe(timeframe):
         now = datetime.date.today()
         if timeframe == "all":
-            logging.info("\n------------------------------------------------")
-            logging.info("All data" + str("\t\t\t\t\t|"))
             comp = now - datetime.timedelta(days=365 * 10)
         elif timeframe == "year":
-            logging.info("\n------------------------------------------------")
-            logging.info("Last year's data" + str("\t\t\t\t|"))
             comp = now - datetime.timedelta(days=365)
         elif timeframe == "month":
-            logging.info("\n------------------------------------------------")
-            logging.info("Last month's data" + str("\t\t\t\t|"))
             comp = now - datetime.timedelta(days=28)
         elif timeframe == "week":
-            logging.info("\n------------------------------------------------")
-            logging.info("Last week's data" + str("\t\t\t\t|"))
             comp = now - datetime.timedelta(days=7)
         else:
-            logging.info("\n------------------------------------------------")
-            logging.info("All data" + str("\t\t\t\t\t|"))
             comp = now - datetime.timedelta(days=365 * 10)
         return comp
 
@@ -357,7 +347,7 @@ class MonkClient(object):
                                                         sentiments["negative"] + sentiments["neutral"]) * 100, 2)
         }
         if print:
-            logging.info("------------------------------------------------")
+            logging.info("\n------------------------------------------------")
             logging.info("General Stats:\t\t\t\t\t")
             logging.info("------------------------------------------------")
             logging.info("Number of Logs:\t\t\t\t|" + str(number_of_logs) + str("\t|"))
@@ -425,14 +415,9 @@ class MonkClient(object):
                 num_of_days += 1/3
         return {
             "number_of_food_logs": int(num_of_days * 3),
-            "avg_calories_per_day": total_calories / num_of_days,
-            "lbs_per_week": (((total_calories / num_of_days) - burn_rate) * 7) / 3500
+            "avg_calories_per_day": int(total_calories / num_of_days),
+            "lbs_per_week": round((((total_calories / num_of_days) - burn_rate) * 7) / 3500, 2)
         }
-
-
-
-
-
 
     def progress_stats(self, comp, number_of_progress, sentiments, trio, weather, weather_mood):
         """
