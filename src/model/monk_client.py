@@ -175,12 +175,16 @@ class MonkClient(object):
                            "sentiment": self.get_sentiment(msg),
                            "weather": Weather.get_weather()}})
 
-    def log_meal(self, mealtime, foods_input:[]):
+    def log_meal(self, mealtime, foods_input: [], date=None):
         logging.info("Logging Meal")
         fl = self.db["FoodLogs"]
-        today = datetime.datetime.now().strftime("%Y-%m-%d")
-        today_time = datetime.datetime.now()
-        start = today + " 00:00"
+        if not date:
+            today = datetime.datetime.now().strftime("%Y-%m-%d")
+            today_time = datetime.datetime.now()
+            start = today + " 00:00"
+        else:
+            today_time = datetime.datetime.strptime(date + " 00:00", "%Y-%m-%d %H:%M")
+            start = date + " 00:00"
         cursor = fl.find({})
         found = False
         if cursor.count() > 0:
@@ -275,29 +279,24 @@ class MonkClient(object):
     def get_timeframe(timeframe):
         now = datetime.date.today()
         if timeframe == "all":
-            logging.info(" __________")
-            logging.info("| All data |")
-            logging.info("|__________|\n")
+            logging.info("\n------------------------------------------------")
+            logging.info("All data" + str("\t\t\t\t\t|"))
             comp = now - datetime.timedelta(days=365 * 10)
         elif timeframe == "year":
-            logging.info(" ________________")
-            logging.info("|Last year's data|")
-            logging.info("|________________|\n")
+            logging.info("\n------------------------------------------------")
+            logging.info("Last year's data" + str("\t\t\t\t|"))
             comp = now - datetime.timedelta(days=365)
         elif timeframe == "month":
-            logging.info(" _________________")
-            logging.info("|Last month's data|")
-            logging.info("|_________________|\n")
+            logging.info("\n------------------------------------------------")
+            logging.info("Last month's data" + str("\t\t\t\t|"))
             comp = now - datetime.timedelta(days=28)
         elif timeframe == "week":
-            logging.info(" ________________")
-            logging.info("|Last week's data|")
-            logging.info("|________________|\n")
+            logging.info("\n------------------------------------------------")
+            logging.info("Last week's data" + str("\t\t\t\t|"))
             comp = now - datetime.timedelta(days=7)
         else:
-            logging.info(" __________")
-            logging.info("| All data |")
-            logging.info("|__________|\n")
+            logging.info("\n------------------------------------------------")
+            logging.info("All data" + str("\t\t\t\t\t|"))
             comp = now - datetime.timedelta(days=365 * 10)
         return comp
 
@@ -335,6 +334,7 @@ class MonkClient(object):
 
         number_of_logs = self.log_stats(comp, number_of_logs, sentiments, weather, weather_mood)
         number_of_progress = self.progress_stats(comp, number_of_progress, sentiments, trio, weather, weather_mood)
+        food_stats = self.food_stats(comp)
 
         for mood in weather_mood.keys():
             most_common_weather_types[mood] = Counter(weather_mood[mood])
@@ -357,20 +357,34 @@ class MonkClient(object):
                                                         sentiments["negative"] + sentiments["neutral"]) * 100, 2)
         }
         if print:
-            logging.info("Number of Logs:\t\t\t\t|" + str(number_of_logs))
-            logging.info("Number of Progress Logs:\t\t|" + str(number_of_progress))
+            logging.info("------------------------------------------------")
+            logging.info("General Stats\t\t\t\t\t|\n\t\t\t\t\t\t|")
+            logging.info("Number of Logs:\t\t\t\t|" + str(number_of_logs) + str("\t|"))
+            logging.info("Number of Progress Logs:\t\t|" + str(number_of_progress) + str("\t|"))
+            logging.info("Number of Food Logs:\t\t\t|" + str(food_stats["number_of_food_logs"]) + str("\t|"))
+            logging.info("------------------------------------------------")
+            logging.info("Weather Stats\t\t\t\t\t|\n\t\t\t\t\t\t|")
             for mood in emotion_percent.keys():
-                logging.info("Percent " + mood.capitalize() + " \t\t\t|" + str(emotion_percent[mood]) + "%")
-            logging.info("Most Common Weather:\t\t\t|" + str(weathers.most_common(1)[0][0]))
+                logging.info("Percent " + mood.capitalize() + " \t\t\t|" + str(emotion_percent[mood]) + " %" + str("|"))
+            logging.info("Most Common Weather:\t\t\t|" + str(weathers.most_common(1)[0][0]) + str("\t|"))
             for mood in top_weathers.keys():
-                logging.info("Most " + mood.capitalize() + " Weather:\t\t\t|" + top_weathers[mood])
-            logging.info("Average Cognitive Rating:\t\t|" + str(round((trio["cognitive"] / number_of_progress), 2)))
-            logging.info("Average Physical Rating:\t\t|" + str(round((trio["physical"] / number_of_progress), 2)))
-            logging.info("Average Emotional Rating:\t\t|" + str(round((trio["emotional"] / number_of_progress), 2)))
+                logging.info("Most " + mood.capitalize() + " Weather:\t\t\t|" + top_weathers[mood] + str("\t|"))
+            logging.info("------------------------------------------------")
+            logging.info("Progress Stats\t\t\t\t\t|\n\t\t\t\t\t\t|")
+            logging.info("Average Cognitive Rating:\t\t|" + str(round((trio["cognitive"] / number_of_progress), 2)) + str("\t|"))
+            logging.info("Average Physical Rating:\t\t|" + str(round((trio["physical"] / number_of_progress), 2)) + str("\t|"))
+            logging.info("Average Emotional Rating:\t\t|" + str(round((trio["emotional"] / number_of_progress), 2)) + str("\t|"))
+            logging.info("------------------------------------------------")
+            logging.info("Food Stats\t\t\t\t\t|\n\t\t\t\t\t\t|")
+            logging.info("Average Calories Per Day\t\t|" + str(food_stats["avg_calories_per_day"]) + str("\t|"))
+            logging.info("Pounds Per Week\t\t\t\t|" + str(food_stats["lbs_per_week"]) + str("\t|"))
+            logging.info("------------------------------------------------")
+            logging.info("\n")
 
         return {
             "logs": number_of_logs,
             "personal_logs": number_of_progress,
+            "food_logs": food_stats["number_of_food_logs"],
             "positive_percent": emotion_percent["positive"],
             "negative_percent": emotion_percent["negative"],
             "neutral_percent": emotion_percent["neutral"],
@@ -379,32 +393,41 @@ class MonkClient(object):
             "neutral_weather": top_weathers["neutral"],
             "avg_cognitive": str(round((trio["cognitive"] / number_of_progress), 2)),
             "avg_physical": str(round((trio["physical"] / number_of_progress), 2)),
-            "avg_emotion": str(round((trio["emotional"] / number_of_progress), 2))
+            "avg_emotion": str(round((trio["emotional"] / number_of_progress), 2)),
+            "avg_calories": food_stats["avg_calories_per_day"],
+            "lbs_per_week": food_stats["lbs_per_week"]
         }
 
-    # def food_stats(self):
-    #     collection = self.db["FoodLogs"]
-    #     cursor = collection.find({})
-    #     collection2 = self.db["PersonalProgress"]
-    #     best_foods = {
-    #         # food_type: how it affected traits
-    #     }
-    #     for data in cursor:
-    #         date = list(data.keys())[1]
-    #         meal = data[date]["meal"]
-    #         foods = data[date]["foods"]
-    #         for food in foods:
-    #             trait_avgs = {
-    #                 "cognitive":0,
-    #                 "physical":0,
-    #                 "emotional":0
-    #             }
-    #             for log in day:
-    #
-    #
-    #             if food not in best_foods:
-    #                 best_foods[food] = 0
-    #             best_foods[food] += 1
+    def food_stats(self, comp):
+        collection = self.db["FoodLogs"]
+        cursor = collection.find({})
+
+        current_day = datetime.datetime.combine(comp, datetime.time.min)
+        total_calories = 0
+        num_of_days = 0
+        burn_rate = 2000
+        days = {}
+        while current_day < datetime.datetime.now():
+            days[current_day.date()] = 0
+            current_day += datetime.timedelta(days=1)
+        for meal in cursor:
+            date = list(meal.keys())[1]
+            try:
+                datecomp = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M")
+            except:
+                datecomp = datetime.datetime.today()
+            if datecomp > datetime.datetime.combine(comp, datetime.time.min) and datetime.date(datecomp.year, datecomp.month, datecomp.day) in days:
+                total_calories += meal[date]["calories"]
+                num_of_days += 1/3
+        return {
+            "number_of_food_logs": int(num_of_days * 3),
+            "avg_calories_per_day": total_calories / num_of_days,
+            "lbs_per_week": (((total_calories / num_of_days) - burn_rate) * 7) / 3500
+        }
+
+
+
+
 
 
     def progress_stats(self, comp, number_of_progress, sentiments, trio, weather, weather_mood):

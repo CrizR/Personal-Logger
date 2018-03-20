@@ -13,13 +13,22 @@ class MonkController(object):
             mc.update_progress(argv)
 
         if argv.dinner:
-            mc.log_meal("dinner", argv.dinner.split(","))
+            if argv.date:
+                mc.log_meal("dinner", argv.dinner.split(","), argv.date)
+            else:
+                mc.log_meal("dinner", argv.dinner.split(","))
 
         if argv.lunch:
-            mc.log_meal("lunch", argv.lunch.split(","))
+            if argv.date:
+                mc.log_meal("lunch", argv.lunch.split(","), argv.date)
+            else:
+                mc.log_meal("lunch", argv.lunch.split(","))
 
         if argv.breakfast:
-            mc.log_meal("breakfast", argv.breakfast.split(","))
+            if argv.date:
+                mc.log_meal("breakfast", argv.breakfast.split(","), argv.date)
+            else:
+                mc.log_meal("breakfast", argv.breakfast.split(","))
 
         if argv.graph:
             mc.graph_data(argv.graph)
@@ -124,6 +133,7 @@ class MonkController(object):
         parser.add_argument("-breakfast",
                             help="Use to log your breakfast, it will automatically add calories if you've"
                                  "inputted the given foods before. Foods should be comma delimited, no spaces.")
+        parser.add_argument("-date", help="Use for updating food log for a different day")
         parser.add_argument("-reset", choices=['food', 'log', 'data'],
                             help="Resets specified data and puts old data in .txt file")
         parser.add_argument("-graph", choices=['all', 'year', 'month', 'week'], help="Use to graph your personal data")
