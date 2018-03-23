@@ -358,14 +358,13 @@ class MonkClient(object):
                                                         sentiments["negative"] + sentiments["neutral"]) * 100, 2)
         }
         if print:
-            logging.info("\n------------------------------------------------")
-            logging.info("General Stats:\t\t\t\t\t")
+            logging.info("\nGeneral Stats:\t\t\t\t\t")
             logging.info("------------------------------------------------")
             logging.info("Number of Logs:\t\t\t\t|" + str(number_of_logs) + str("\t|"))
             logging.info("Number of Progress Logs:\t\t|" + str(number_of_progress) + str("\t|"))
             logging.info("Number of Food Logs:\t\t\t|" + str(food_stats["number_of_food_logs"]) + str("\t|"))
             for mood in emotion_percent.keys():
-                logging.info("Percent " + mood.capitalize() + " \t\t\t|" + str(emotion_percent[mood]) + " %" + str("|"))
+                logging.info("Percent " + mood.capitalize() + " \t\t\t|" + str(round(emotion_percent[mood])) + " %" + str("\t|"))
             logging.info("------------------------------------------------")
             logging.info("Weather Stats:\t\t\t\t\t")
             logging.info("------------------------------------------------")
