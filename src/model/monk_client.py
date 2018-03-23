@@ -19,6 +19,10 @@ class MonkClient(object):
         self.client = pymongo.MongoClient(host, port)
         self.calorie_client = CalorieClient(host, port)
         self.db = self.client["MonkMode"]
+        self.monk_logs = self.db["MonkLogs"]
+        self.food_logs = self.db["FoodLogs"]
+        self.prog_logs = self.db["PersonalProgress"]
+        self.sleep_logs = self.db["SleepLogs"]
 
     def update_progress(self, argv):
         """
@@ -59,8 +63,7 @@ class MonkClient(object):
         today = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
         insert_data = {today: {"data": data, "weather": Weather.get_weather()}}
         logging.info("Updating Progress")
-        pprog = self.db["PersonalProgress"]
-        pprog.insert(insert_data)
+        self.prog_logs.insert(insert_data)
 
     def graph_data(self, timeframe):
         """
@@ -68,7 +71,7 @@ class MonkClient(object):
         :return:
         """
         logging.info("Graphing Data")
-        pprog = self.db["PersonalProgress"]
+        pprog = self.prog_logs
         cursor = pprog.find({})
         data = {
             "emotional": [],
@@ -100,7 +103,7 @@ class MonkClient(object):
         :return:
         """
         logging.info("Printing PData")
-        pprog = self.db["PersonalProgress"]
+        pprog = self.prog_logs
         cursor = pprog.find({})
         if to_file:
             ff = open(os.getcwd() + "/progress_data.txt", "w+")
@@ -123,7 +126,7 @@ class MonkClient(object):
         :return:
         """
         logging.info("Printing Log Data")
-        ml = self.db["MonkLogs"]
+        ml = self.monk_logs
         cursor = ml.find({})
         if to_file:
             ff = open("log_data.txt", "w+")
@@ -146,7 +149,7 @@ class MonkClient(object):
                :return:
                """
         logging.info("Printing Food Data")
-        ml = self.db["FoodLogs"]
+        ml = self.food_logs
         cursor = ml.find({})
         if to_file:
             ff = open("food_data.txt", "w+")
@@ -169,7 +172,7 @@ class MonkClient(object):
         :return:
         """
         logging.info("Logging Message")
-        ml = self.db["MonkLogs"]
+        ml = self.monk_logs
         today = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
         ml.insert({today: {"log": msg,
                            "sentiment": self.get_sentiment(msg),
@@ -177,7 +180,7 @@ class MonkClient(object):
 
     def log_meal(self, mealtime, foods_input: [], date=None):
         logging.info("Logging Meal")
-        fl = self.db["FoodLogs"]
+        fl = self.food_logs
         if not date:
             today = datetime.datetime.now().strftime("%Y-%m-%d")
             today_time = datetime.datetime.now()
@@ -213,6 +216,14 @@ class MonkClient(object):
             calories = self.calorie_client.aggregate_calories(foods_input)
             fl.insert({today_time.strftime("%Y-%m-%d %H:%M"): {"meal": mealtime, "foods": foods_input, "calories": calories}})
 
+    def log_sleep(self, hours, bedtime, waketime, date=None):
+        if not date:
+            today_time = datetime.datetime.now()
+        else:
+            today_time = datetime.datetime.strptime(date + " 00:00", "%Y-%m-%d %H:%M")
+        self.sleep_logs.insert_one({today_time.strftime("%Y-%m-%d %H:%M"):
+                                        {"hours": hours, "bedtime": bedtime, "waketime": waketime}})
+
     def import_data(self, file, import_type):
         """
         Imports data from the given file
@@ -221,11 +232,11 @@ class MonkClient(object):
         :return:
         """
         if import_type == "data":
-            collection = self.db["PersonalProgress"]
+            collection = self.prog_logs
         elif import_type == "log":
-            collection = self.db["MonkLogs"]
+            collection = self.monk_logs
         elif import_type == "food":
-            collection = self.db["FoodLogs"]
+            collection = self.food_logs
         else:
             collection = ""
             logging.error("Invalid Type")
@@ -353,11 +364,11 @@ class MonkClient(object):
             logging.info("Number of Logs:\t\t\t\t|" + str(number_of_logs) + str("\t|"))
             logging.info("Number of Progress Logs:\t\t|" + str(number_of_progress) + str("\t|"))
             logging.info("Number of Food Logs:\t\t\t|" + str(food_stats["number_of_food_logs"]) + str("\t|"))
+            for mood in emotion_percent.keys():
+                logging.info("Percent " + mood.capitalize() + " \t\t\t|" + str(emotion_percent[mood]) + " %" + str("|"))
             logging.info("------------------------------------------------")
             logging.info("Weather Stats:\t\t\t\t\t")
             logging.info("------------------------------------------------")
-            for mood in emotion_percent.keys():
-                logging.info("Percent " + mood.capitalize() + " \t\t\t|" + str(emotion_percent[mood]) + " %" + str("|"))
             logging.info("Most Common Weather:\t\t\t|" + str(weathers.most_common(1)[0][0]) + str("\t|"))
             for mood in top_weathers.keys():
                 logging.info("Most " + mood.capitalize() + " Weather:\t\t\t|" + top_weathers[mood] + str("\t|"))
@@ -393,8 +404,7 @@ class MonkClient(object):
         }
 
     def food_stats(self, comp):
-        collection = self.db["FoodLogs"]
-        cursor = collection.find({})
+        cursor = self.food_logs.find({})
 
         current_day = datetime.datetime.combine(comp, datetime.time.min)
         total_calories = 0
@@ -430,7 +440,7 @@ class MonkClient(object):
         :param weather_mood:
         :return:
         """
-        collection = self.db["PersonalProgress"]
+        collection = self.prog_logs
         cursor = collection.find({})
         for data in cursor:
             date = list(data.keys())[1]
@@ -467,8 +477,7 @@ class MonkClient(object):
         :param weather_mood:
         :return:
         """
-        collection = self.db["MonkLogs"]
-        cursor = collection.find({})
+        cursor = self.monk_logs.find({})
         for log in cursor:
             date = list(log.keys())[1]
             try:
